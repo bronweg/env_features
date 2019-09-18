@@ -71,3 +71,6 @@ function! UnCommentLine()
         execute ":silent! normal :s/\s*" . endsymbol . "\s*$//\<CR>"
 endfunction
 
+"set bg=dark
+"syntax on
+autocmd FileType yaml setlocal ai ts=2 sw=2 et
