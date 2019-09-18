@@ -49,6 +49,8 @@ function RetFileType()
         let file_name = buffer_name("%")
         if file_name =~ '\.vim'
                 return ["\"", ""]
+        elseif file_name =~ 'vimrc$'
+                return ["\"", ""]
         elseif __is_django_template() == 1
                 return ['{% comment %}' , '{% endcomment %}']
         elseif file_name =~ '\.html$' || file_name =~ '\.xhtml$' || file_name =~ '\.xml'
