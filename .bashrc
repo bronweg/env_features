@@ -132,3 +132,6 @@ function dns {
         grep '^nameserver' /etc/resolv.conf | cut -c 12- | xargs -i host $1 {} | grep -B 5 "has address"
 }
 
+function docker-ssh {
+	docker exec -it $1 /bin/bash;
+}
