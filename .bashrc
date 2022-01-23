@@ -139,3 +139,5 @@ function dns {
 function docker-ssh {
 	docker exec -it $1 /bin/bash;
 }
+
+bind 'set enable-bracketed-paste off'
