@@ -112,8 +112,6 @@ fi
 if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
     . /etc/bash_completion
 fi
-alias k=kubectl
-complete -F __start_kubectl k
 
 ####################
 ### User defined ###
@@ -234,8 +232,13 @@ function kx {
 }
 
 alias ns="kubens"
+
 source "/home/linuxbrew/.linuxbrew/opt/kube-ps1/share/kube-ps1.sh"
 export PATH=${PATH}:/home/$USER/.local/bin
+
+alias k=kubectl
+complete -F __start_kubectl k
+
 alias idea="/home/$USER/Downloads/idea-IU-221.5591.52/bin/idea.sh"
 alias atom="/usr/bin/flatpak run --branch=stable --arch=x86_64 --command=atom --file-forwarding io.atom.Atom"
 alias meld="/usr/bin/flatpak run --branch=stable --arch=x86_64 --command=meld --file-forwarding org.gnome.meld"
