@@ -112,6 +112,8 @@ fi
 if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
     . /etc/bash_completion
 fi
+alias k=kubectl
+complete -F __start_kubectl k
 
 ####################
 ### User defined ###
@@ -141,3 +143,99 @@ function docker-ssh {
 }
 
 bind 'set enable-bracketed-paste off'
+
+parse_git_branch() {
+	git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
+}
+current_cluster() {
+	kubectx --current
+}
+current_namespace() {
+	kubens --current
+}
+#source /usr/lib/kube-ps1.sh
+#PS1='\[\033[01;30m\][\A] \[\033[01;31m\][\[\033[01;34m\]\h\[\033[01;34m\] \W\[\033[01;31m\]] \[\033[00;31m\]\$\[\033[00m\] '
+#PS1="\[\033]0;$PWD\007\]\[\033[33m\][\D{%Y-%m-%d %H:%M.%S}]\[\033[0m\] \[\033[35m\]\w\[\033[0m\] \[\033\n[36m\][\u.\h]\[\033[0m\] \[\033(0\]b\[\033(B\]"
+#PS1="\[\033[36m\][\u@\h]\[\033[0m\] \[\033(0\]b\[\033(B\]\n\[\033[32m\]\$(current_cluster)/\[\033[32m\]\$(current_namespace)\n\[\033]0;$PWD\007\]\[\033[33m\][\D{%Y-%m-%d %H:%M.%S}]\[\033[0m\] \[\033[35m\]\w\[\033[36m\]:\[\033[0m\]\$(parse_git_branch) "
+PS1="\[\033[36m\][\u@\h]\[\033[0m\] \[\033(0\]b\[\033(B\]\n\[\033[32m\]\$(kube_ps1)\n\[\033]0;$PWD\007\]\[\033[33m\][\D{%Y-%m-%d %H:%M.%S}]\[\033[0m\] \[\033[35m\]\w\[\033[36m\]:\[\033[0m\]\$(parse_git_branch) "
+
+
+case "$TERM" in
+xterm*|rxvt*)
+    PROMPT_COMMAND='echo -ne "\033]0;${HOSTNAME}\007"'
+    ;;
+*)
+    ;;
+esac
+
+function dns {
+        grep '^nameserver' /etc/resolv.conf | cut -c 12- | xargs -i host $1 {} | grep -B 5 "has address"
+}
+
+function docker-ssh {
+	docker exec -it $@ /bin/bash;
+}
+
+function kx {
+  case $1 in
+    "")
+      kubectx
+      ;;
+    lab)
+      kubectx dwh-dwh-illab-cluster
+      ;;
+    stg)
+      case $2 in
+        sun1)
+          kubectx stg_dwh_sun1
+          ;;
+        ber1)
+          kubectx stg_tis_ber1
+          ;;
+        fra1)
+          echo "Staging cluster in FRA1 still hasn't been configured"
+          ;;
+        "")
+          echo "Error! You have to provide an argument of exact staging environment do you want to connect"
+          ;;
+        *)
+          echo "Error! Unknown argument $2 for staging environment"
+          ;;
+      esac
+      ;;
+    prd)
+      case $2 in
+        sun1)
+          kubectx prd_all_sun1
+          ;;
+        ber1)
+          kubectx prd_dwh_ber1
+          ;;
+        fra1)
+          kubectx prd_tis_fra1
+          ;;
+        "")
+          echo "Error! You have to provide an argument of exact production environment do you want to connect"
+          ;;
+        *)
+          echo "Error! Unknown argument $2 for production environment"
+          ;;
+      esac
+      ;;
+    *|--)
+      if [[ $1 == "--" ]]; then
+        shift
+      else
+        echo -e "Error! Unknown argument $1\nRunning a regular kubectx with all provided arguments."
+      fi
+      kubectx $@
+      ;;
+  esac
+}
+
+alias ns="kubens"
+source "/home/linuxbrew/.linuxbrew/opt/kube-ps1/share/kube-ps1.sh"
+export PATH=${PATH}:/home/$USER/.local/bin
+alias idea="/home/$USER/Downloads/idea-IU-221.5591.52/bin/idea.sh"
+alias atom="/usr/bin/flatpak run --branch=stable --arch=x86_64 --command=atom --file-forwarding io.atom.Atom"
+alias meld="/usr/bin/flatpak run --branch=stable --arch=x86_64 --command=meld --file-forwarding org.gnome.meld"
